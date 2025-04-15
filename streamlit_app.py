@@ -1,14 +1,18 @@
 import streamlit as st
+import pandas as pd
+import os
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
-import pandas as pd
 
 # Título
 st.title("🚲 Cycle World Dashboard")
 
-# Conexión a Snowflake (reemplaza con tu configuración)
-import os
+# Verificación de credenciales
+if not all([os.getenv("SNOWFLAKE_ACCOUNT"), os.getenv("SNOWFLAKE_USER"), os.getenv("SNOWFLAKE_PASSWORD")]):
+    st.error("❌ Faltan credenciales para conectarse a Snowflake. Verifica tus secrets en Streamlit Cloud.")
+    st.stop()
 
+# Parámetros de conexión
 connection_parameters = {
     "account": os.getenv("SNOWFLAKE_ACCOUNT"),
     "user": os.getenv("SNOWFLAKE_USER"),
@@ -54,3 +58,5 @@ duracion = session.table("DURACION_PROMEDIO_DIAS_DESPEJADOS").to_pandas().iloc[0
 st.metric("🌧️ % de viajes con lluvia", f"{lluvia}%")
 st.metric("🌤️ Duración promedio (min)", f"{duracion} min")
 
+# Cierre de sesión
+session.close()
