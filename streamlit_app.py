@@ -1,21 +1,16 @@
-from pathlib import Path
-import os
-
-# Código de la app Streamlit corregido
-streamlit_code = """
 import streamlit as st
-import pandas as pd
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
+import pandas as pd
 
 # Título
 st.title("🚲 Cycle World Dashboard")
 
 # Conexión a Snowflake (reemplaza con tu configuración)
 connection_parameters = {
-    "account": os.getenv("YXIDKJD-NXB97474"),
-    "user": os.getenv("aLVARO"),
-    "password": os.getenv("Acecombatrex123?"),
+    "account": "<your_account>",
+    "user": "<your_user>",
+    "password": "<your_password>",
     "role": "SYSADMIN",
     "warehouse": "COMPUTE_WH",
     "database": "CYCLE_WORLD",
@@ -56,10 +51,4 @@ lluvia = session.table("PORCENTAJE_VIAJES_LLUVIOSOS").to_pandas().iloc[0,0]
 duracion = session.table("DURACION_PROMEDIO_DIAS_DESPEJADOS").to_pandas().iloc[0,0]
 st.metric("🌧️ % de viajes con lluvia", f"{lluvia}%")
 st.metric("🌤️ Duración promedio (min)", f"{duracion} min")
-"""
 
-# Guardar archivo
-file_path = Path("/mnt/data/streamlit_app.py")
-file_path.write_text(streamlit_code)
-
-str(file_path)
