@@ -13,9 +13,9 @@ st.title("🚲 Cycle World Dashboard")
 
 # Conexión a Snowflake (reemplaza con tu configuración)
 connection_parameters = {
-    "account": os.getenv("NXB97474"),
-    "user": os.getenv("ALVARO"),
-    "password": os.getenv("SNOWFLAKE_PASSWORD"),
+    "account": os.getenv("YXIDKJD-NXB97474"),
+    "user": os.getenv("aLVARO"),
+    "password": os.getenv("Acecombatrex123?"),
     "role": "SYSADMIN",
     "warehouse": "COMPUTE_WH",
     "database": "CYCLE_WORLD",
