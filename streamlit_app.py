@@ -2,16 +2,17 @@ import streamlit as st
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
 import pandas as pd
-import os
 
 # Título
 st.title("🚲 Cycle World Dashboard")
 
 # Conexión a Snowflake (reemplaza con tu configuración)
+import os
+
 connection_parameters = {
-    "account": os.getenv("YXIDKJD-NXB97474"),
-    "user": os.getenv("Alvaro"),
-    "password": "Acecombatrex123",
+    "account": os.getenv("SNOWFLAKE_ACCOUNT"),
+    "user": os.getenv("SNOWFLAKE_USER"),
+    "password": os.getenv("SNOWFLAKE_PASSWORD"),
     "role": "SYSADMIN",
     "warehouse": "COMPUTE_WH",
     "database": "CYCLE_WORLD",
