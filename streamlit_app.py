@@ -39,6 +39,10 @@ viajes_df["FECHA_FIN"] = pd.to_datetime(viajes_df["FECHA_FIN"], format="%d/%m/%Y
 viajes_filtrados = viajes_df[(viajes_df["FECHA_INICIO"] >= pd.to_datetime(fecha_inicio)) & 
                               (viajes_df["FECHA_INICIO"] <= pd.to_datetime(fecha_fin))]
 
+# 👉 Formato de fecha local (dd/mm/yyyy)
+viajes_filtrados["FECHA_INICIO"] = viajes_filtrados["FECHA_INICIO"].dt.strftime("%d/%m/%Y")
+viajes_filtrados["FECHA_FIN"] = viajes_filtrados["FECHA_FIN"].dt.strftime("%d/%m/%Y")
+
 st.subheader("📋 Viajes Filtrados")
 st.dataframe(viajes_filtrados)
 
