@@ -2,8 +2,6 @@ import streamlit as st
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
 import pandas as pd
-pip install snowflake-snowpark-python
-pip install pandas streamlit plotly
 
 # Título
 st.title("🚲 Cycle World Dashboard")
