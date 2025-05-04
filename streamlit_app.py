@@ -34,19 +34,21 @@ viajes_df["FECHA_FIN"]    = pd.to_datetime(viajes_df["FECHA_FIN"],    format="%d
 min_fecha = viajes_df["FECHA_INICIO"].min().date()
 max_fecha = viajes_df["FECHA_INICIO"].max().date()
 
-# Sidebar: Filtros con rango dinámico
+# Sidebar: Filtros con rango dinámico y formato día/mes/año
 st.sidebar.header("Filtros")
 fecha_inicio = st.sidebar.date_input(
     "Fecha desde",
     value=min_fecha,
     min_value=min_fecha,
-    max_value=max_fecha
+    max_value=max_fecha,
+    format="DD/MM/YYYY"
 )
 fecha_fin = st.sidebar.date_input(
     "Fecha hasta",
     value=max_fecha,
     min_value=min_fecha,
-    max_value=max_fecha
+    max_value=max_fecha,
+    format="DD/MM/YYYY"
 )
 sector = st.sidebar.text_input("Filtrar por sector (ej: Marylebone)", "")
 
