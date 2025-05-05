@@ -115,16 +115,16 @@ try:
 except:
     st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
 
-st.subheader("📊 Movimientos por Franja Horaria")
-
 # Reporte de franja horaria
 st.subheader("📊 Movimientos por Franja Horaria")
 
 # Filtrar REPORTE_MOVIMIENTOS por fecha
 reporte_df = (
     session.table("REPORTE_MOVIMIENTOS")
-    .filter((col("FECHA_VIAJE") >= lit(fecha_inicio)) & (col("FECHA_VIAJE") <= lit(fecha_fin)))
-    .to_pandas()
+    .filter(
+    (col("FECHA_VIAJE") >= lit(str(fecha_inicio))) &
+    (col("FECHA_VIAJE") <= lit(str(fecha_fin)))
+).to_pandas()
 )
 
 with st.expander("Ver detalles del reporte por franja horaria"):
