@@ -119,12 +119,13 @@ except:
 st.subheader("📊 Movimientos por Franja Horaria")
 
 # Filtrar REPORTE_MOVIMIENTOS por fecha
+fecha_inicio_str = str(fecha_inicio)
+fecha_fin_str = str(fecha_fin)
+
 reporte_df = (
     session.table("REPORTE_MOVIMIENTOS")
-    .filter(
-    (col("FECHA_VIAJE") >= lit(str(fecha_inicio))) &
-    (col("FECHA_VIAJE") <= lit(str(fecha_fin)))
-).to_pandas()
+    .filter((col("FECHA_VIAJE") >= lit(fecha_inicio_str)) & (col("FECHA_VIAJE") <= lit(fecha_fin_str)))
+    .to_pandas()
 )
 
 with st.expander("Ver detalles del reporte por franja horaria"):
