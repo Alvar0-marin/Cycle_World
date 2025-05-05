@@ -4,6 +4,7 @@ import os
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
 import datetime as dt
+import plotly.express as px
 
 # Título
 st.title("🚲 Cycle World Dashboard")
@@ -25,34 +26,29 @@ connection_parameters = {
 }
 session = Session.builder.configs(connection_parameters).create()
 
-# 🔹 Cargar y parsear datos de viajes
-viajes_df = session.table("RESUMEN_VIAJES").to_pandas()
-viajes_df["FECHA_INICIO"] = pd.to_datetime(viajes_df["FECHA_INICIO"], format="%d/%m/%Y")
-viajes_df["FECHA_FIN"]    = pd.to_datetime(viajes_df["FECHA_FIN"],    format="%d/%m/%Y")
+# Cargar y parsear datos
+with st.spinner("Cargando datos de viajes..."):
+    viajes_df = session.table("RESUMEN_VIAJES").to_pandas()
 
-# Determinar el rango de fechas disponible
+viajes_df["FECHA_INICIO"] = pd.to_datetime(viajes_df["FECHA_INICIO"], format="%d/%m/%Y")
+viajes_df["FECHA_FIN"]    = pd.to_datetime(viajes_df["FECHA_FIN"], format="%d/%m/%Y")
+
+# Filtros
+st.sidebar.header("📅 Filtros por Fecha y Sector")
+
 min_fecha = viajes_df["FECHA_INICIO"].min().date()
 max_fecha = viajes_df["FECHA_INICIO"].max().date()
 
-# Sidebar: Filtros con rango dinámico y formato día/mes/año
-st.sidebar.header("Filtros")
-fecha_inicio = st.sidebar.date_input(
-    "Fecha desde",
-    value=min_fecha,
-    min_value=min_fecha,
-    max_value=max_fecha,
-    format="DD/MM/YYYY"
-)
-fecha_fin = st.sidebar.date_input(
-    "Fecha hasta",
-    value=max_fecha,
-    min_value=min_fecha,
-    max_value=max_fecha,
-    format="DD/MM/YYYY"
-)
+fecha_inicio = st.sidebar.date_input("Fecha desde", min_value=min_fecha, max_value=max_fecha, value=min_fecha, format="DD/MM/YYYY")
+fecha_fin    = st.sidebar.date_input("Fecha hasta", min_value=min_fecha, max_value=max_fecha, value=max_fecha, format="DD/MM/YYYY")
 sector = st.sidebar.text_input("Filtrar por sector (ej: Marylebone)", "")
 
-# Filtrar DataFrame
+# Validar fechas
+if fecha_inicio > fecha_fin:
+    st.warning("⚠️ La fecha de inicio no puede ser posterior a la fecha de fin.")
+    st.stop()
+
+# Aplicar filtros
 mask = (
     (viajes_df["FECHA_INICIO"].dt.date >= fecha_inicio) &
     (viajes_df["FECHA_INICIO"].dt.date <= fecha_fin)
@@ -61,30 +57,58 @@ if sector:
     mask &= viajes_df["SECTOR_ESTACION"].str.contains(sector, case=False)
 
 viajes_filtrados = viajes_df.loc[mask].copy()
-
-# Formatear fechas para mostrar
 viajes_filtrados["FECHA_INICIO"] = viajes_filtrados["FECHA_INICIO"].dt.strftime("%d/%m/%Y")
 viajes_filtrados["FECHA_FIN"]    = viajes_filtrados["FECHA_FIN"].dt.strftime("%d/%m/%Y")
 
-# Mostrar tabla de viajes filtrados
-st.subheader("📋 Viajes Filtrados")
-st.dataframe(viajes_filtrados)
+# Mostrar cantidad de viajes
+st.metric("🧾 Total de viajes filtrados", len(viajes_filtrados))
 
-# 🔹 ESTACIONES MÁS CONCURRIDAS
-st.subheader("🏙️ Top Estaciones Más Concurridas")
+# Tabla con viajes
+with st.expander("📋 Detalles de viajes filtrados"):
+    st.dataframe(viajes_filtrados)
+
+# Top estaciones más concurridas
+st.subheader("🏙️ Estaciones más concurridas")
 top_estaciones_df = session.table("ESTACIONES_MAS_CONCURRIDAS").to_pandas()
-st.bar_chart(top_estaciones_df.set_index("STATION_NAME"))
+fig_estaciones = px.bar(top_estaciones_df, x="STATION_NAME", y="TOTAL", title="Top Estaciones Más Concurridas")
+st.plotly_chart(fig_estaciones)
 
-# 🔹 USO DE COLORES
-st.subheader("🎨 Colores de Bicicletas")
+# Uso de colores de bicicletas
+st.subheader("🎨 Uso de bicicletas por color")
 colores_df = session.table("USO_COLORES_BICICLETAS").to_pandas()
-st.bar_chart(colores_df.set_index("BIKE_COLOR"))
+fig_colores = px.bar(colores_df, x="BIKE_COLOR", y="COUNT", title="Uso por Color de Bicicleta")
+st.plotly_chart(fig_colores)
 
-# 🔹 PORCENTAJE LLUVIOSOS / DURACIÓN DESPEJADOS
-lluvia   = session.table("PORCENTAJE_VIAJES_LLUVIOSOS").to_pandas().iloc[0, 0]
+# Destacar color más y menos usado
+color_mas_usado = colores_df.loc[colores_df["COUNT"].idxmax()]
+color_menos_usado = colores_df.loc[colores_df["COUNT"].idxmin()]
+col1, col2 = st.columns(2)
+col1.metric("🎯 Color más usado", color_mas_usado["BIKE_COLOR"])
+col2.metric("🚫 Menos usado", color_menos_usado["BIKE_COLOR"])
+
+# Métricas clima
+st.subheader("🌦️ Viajes y Clima")
+lluvia = session.table("PORCENTAJE_VIAJES_LLUVIOSOS").to_pandas().iloc[0, 0]
 duracion = session.table("DURACION_PROMEDIO_DIAS_DESPEJADOS").to_pandas().iloc[0, 0]
-st.metric("🌧️ % de viajes con lluvia",     f"{lluvia}%")
-st.metric("🌤️ Duración promedio (min)",    f"{duracion} min")
+
+col3, col4 = st.columns(2)
+col3.metric("🌧️ % de viajes con lluvia", f"{lluvia}%")
+col4.metric("🌤️ Duración promedio (min)", f"{duracion} min")
+
+# Estaciones sin bicicletas
+st.subheader("❗ Estaciones sin bicicletas disponibles")
+try:
+    sin_bicicletas_df = session.table("ESTACIONES_SIN_BICICLETAS").to_pandas()
+    if sin_bicicletas_df.empty:
+        st.info("No hubo días con estaciones completamente vacías.")
+    else:
+        st.dataframe(sin_bicicletas_df)
+except:
+    st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
+
+# Mapa de estaciones (si se desea agregar)
+# estaciones_df = session.table("STATIONS").to_pandas()
+# st.map(estaciones_df[['LATITUDE', 'LONGITUDE']])
 
 # Cierre de sesión
 session.close()
