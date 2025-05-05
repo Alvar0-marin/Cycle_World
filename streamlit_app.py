@@ -115,20 +115,25 @@ try:
 except:
     st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
 
-# 🔄 REPORTE DE MOVIMIENTOS (Con totales por franja horaria)
+# 🔄 REPORTE DE MOVIMIENTOS (Con filtro por sector y resumen por franja horaria)
 st.subheader("📈 Resumen por Franja Horaria")
 
 try:
     movimientos_df = session.table("REPORTE_MOVIMIENTOS").to_pandas()
 
-    # Mostrar tabla original
-    with st.expander("Ver detalles de movimientos por franja"):
+    # Input para filtrar por sector
+    filtro_sector = st.text_input("🔍 Filtrar por sector (ej: Marylebone)", "")
+
+    if filtro_sector:
+        movimientos_df = movimientos_df[movimientos_df["STATION_NAME"].str.contains(filtro_sector, case=False)]
+
+    # Mostrar tabla filtrada
+    with st.expander("Ver detalles de movimientos filtrados"):
         st.dataframe(movimientos_df)
 
-    # Agrupar por franja horaria (suma total de llegadas + salidas)
+    # Agrupar por franja horaria
     resumen_franja = movimientos_df.groupby("FRANJA_HORARIA")["TOTAL"].sum().reset_index()
 
-    # Mostrar resumen
     st.subheader("🔢 Total de movimientos por franja")
     st.dataframe(resumen_franja)
 
