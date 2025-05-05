@@ -115,31 +115,5 @@ try:
 except:
     st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
 
-# Reporte de franja horaria
-st.subheader("📊 Movimientos por Franja Horaria")
-
-# Filtrar REPORTE_MOVIMIENTOS por fecha usando strings seguros
-try:
-    reporte_df = (
-        session.table("REPORTE_MOVIMIENTOS")
-        .filter((col("FECHA_VIAJE") >= lit(fecha_inicio_str)) & (col("FECHA_VIAJE") <= lit(fecha_fin_str)))
-        .to_pandas()
-    )
-
-    with st.expander("Ver detalles del reporte por franja horaria"):
-        st.dataframe(reporte_df)
-
-    fig_franja = px.bar(
-        reporte_df.groupby(["FRANJA_HORARIA", "TIPO_MOVIMIENTO"])["TOTAL"].sum().reset_index(),
-        x="FRANJA_HORARIA",
-        y="TOTAL",
-        color="TIPO_MOVIMIENTO",
-        barmode="group",
-        title="Total de Movimientos por Franja Horaria"
-    )
-    st.plotly_chart(fig_franja)
-except Exception as e:
-    st.warning(f"No se pudo cargar REPORTE_MOVIMIENTOS: {e}")
-
 # Cierre de sesión
 session.close()
