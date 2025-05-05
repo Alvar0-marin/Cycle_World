@@ -70,21 +70,29 @@ with st.expander("📋 Detalles de viajes filtrados"):
 # Top estaciones más concurridas
 st.subheader("🏙️ Estaciones más concurridas")
 top_estaciones_df = session.table("ESTACIONES_MAS_CONCURRIDAS").to_pandas()
-fig_estaciones = px.bar(top_estaciones_df, x="STATION_NAME", y="TOTAL", title="Top Estaciones Más Concurridas")
-st.plotly_chart(fig_estaciones)
+st.write("Columnas disponibles:", top_estaciones_df.columns.tolist())
+columnas = [col.upper().replace(" ", "_") for col in top_estaciones_df.columns]
+top_estaciones_df.columns = columnas
+
+if "STATION_NAME" in columnas and "TOTAL" in columnas:
+    fig_estaciones = px.bar(top_estaciones_df, x="STATION_NAME", y="TOTAL", title="Top Estaciones Más Concurridas")
+    st.plotly_chart(fig_estaciones)
+else:
+    st.warning("❌ No se encontraron las columnas 'STATION_NAME' y 'TOTAL' en la tabla.")
+    st.dataframe(top_estaciones_df)
 
 # Uso de colores de bicicletas
 st.subheader("🎨 Uso de bicicletas por color")
 colores_df = session.table("USO_COLORES_BICICLETAS").to_pandas()
-fig_colores = px.bar(colores_df, x="BIKE_COLOR", y="COUNT", title="Uso por Color de Bicicleta")
+fig_colores = px.bar(colores_df, x=colores_df.columns[0], y=colores_df.columns[1], title="Uso por Color de Bicicleta")
 st.plotly_chart(fig_colores)
 
 # Destacar color más y menos usado
-color_mas_usado = colores_df.loc[colores_df["COUNT"].idxmax()]
-color_menos_usado = colores_df.loc[colores_df["COUNT"].idxmin()]
+color_mas_usado = colores_df.loc[colores_df.iloc[:,1].idxmax()]
+color_menos_usado = colores_df.loc[colores_df.iloc[:,1].idxmin()]
 col1, col2 = st.columns(2)
-col1.metric("🎯 Color más usado", color_mas_usado["BIKE_COLOR"])
-col2.metric("🚫 Menos usado", color_menos_usado["BIKE_COLOR"])
+col1.metric("🎯 Color más usado", color_mas_usado[0])
+col2.metric("🚫 Menos usado", color_menos_usado[0])
 
 # Métricas clima
 st.subheader("🌦️ Viajes y Clima")
@@ -105,10 +113,6 @@ try:
         st.dataframe(sin_bicicletas_df)
 except:
     st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
-
-# Mapa de estaciones (si se desea agregar)
-# estaciones_df = session.table("STATIONS").to_pandas()
-# st.map(estaciones_df[['LATITUDE', 'LONGITUDE']])
 
 # Cierre de sesión
 session.close()
