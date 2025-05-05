@@ -74,11 +74,12 @@ st.write("Columnas disponibles:", top_estaciones_df.columns.tolist())
 columnas = [col.upper().replace(" ", "_") for col in top_estaciones_df.columns]
 top_estaciones_df.columns = columnas
 
-if "STATION_NAME" in columnas and "TOTAL" in columnas:
-    fig_estaciones = px.bar(top_estaciones_df, x="STATION_NAME", y="TOTAL", title="Top Estaciones Más Concurridas")
+# Usar los nombres reales directamente
+if "STATION_NAME" in top_estaciones_df.columns and "TOTAL_MOVIMIENTOS" in top_estaciones_df.columns:
+    fig_estaciones = px.bar(top_estaciones_df, x="STATION_NAME", y="TOTAL_MOVIMIENTOS", title="Top Estaciones Más Concurridas")
     st.plotly_chart(fig_estaciones)
 else:
-    st.warning("❌ No se encontraron las columnas 'STATION_NAME' y 'TOTAL' en la tabla.")
+    st.warning("❌ No se encontraron las columnas esperadas en la tabla.")
     st.dataframe(top_estaciones_df)
 
 # Uso de colores de bicicletas
