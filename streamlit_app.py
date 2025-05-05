@@ -117,16 +117,29 @@ except:
 
 st.subheader("📊 Movimientos por Franja Horaria")
 
-# Filtrar el reporte por el rango de fechas
+# Reporte de franja horaria
+st.subheader("📊 Movimientos por Franja Horaria")
+
+# Filtrar REPORTE_MOVIMIENTOS por fecha
 reporte_df = (
     session.table("REPORTE_MOVIMIENTOS")
     .filter((col("FECHA_VIAJE") >= lit(fecha_inicio)) & (col("FECHA_VIAJE") <= lit(fecha_fin)))
     .to_pandas()
 )
 
-# Mostrar tabla filtrada
 with st.expander("Ver detalles del reporte por franja horaria"):
     st.dataframe(reporte_df)
+
+# Gráfico por franja y tipo
+fig_franja = px.bar(
+    reporte_df.groupby(["FRANJA_HORARIA", "TIPO_MOVIMIENTO"])["TOTAL"].sum().reset_index(),
+    x="FRANJA_HORARIA",
+    y="TOTAL",
+    color="TIPO_MOVIMIENTO",
+    barmode="group",
+    title="Total de Movimientos por Franja Horaria"
+)
+st.plotly_chart(fig_franja)
 
 # Cierre de sesión
 session.close()
