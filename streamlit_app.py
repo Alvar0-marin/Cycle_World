@@ -115,5 +115,29 @@ try:
 except:
     st.warning("No se encontró la vista ESTACIONES_SIN_BICICLETAS.")
 
+# 🔄 REPORTE DE MOVIMIENTOS (Con totales por franja horaria)
+st.subheader("📈 Resumen por Franja Horaria")
+
+try:
+    movimientos_df = session.table("REPORTE_MOVIMIENTOS").to_pandas()
+
+    # Mostrar tabla original
+    with st.expander("Ver detalles de movimientos por franja"):
+        st.dataframe(movimientos_df)
+
+    # Agrupar por franja horaria (suma total de llegadas + salidas)
+    resumen_franja = movimientos_df.groupby("FRANJA_HORARIA")["TOTAL"].sum().reset_index()
+
+    # Mostrar resumen
+    st.subheader("🔢 Total de movimientos por franja")
+    st.dataframe(resumen_franja)
+
+    # Gráfico de barras
+    fig_franja = px.bar(resumen_franja, x="FRANJA_HORARIA", y="TOTAL", title="Movimientos por Franja Horaria")
+    st.plotly_chart(fig_franja)
+
+except Exception as e:
+    st.warning(f"No se pudo cargar REPORTE_MOVIMIENTOS: {e}")
+
 # Cierre de sesión
 session.close()
