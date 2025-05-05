@@ -119,8 +119,8 @@ except:
 st.subheader("📊 Movimientos por Franja Horaria")
 
 # Filtrar REPORTE_MOVIMIENTOS por fecha
-fecha_inicio_str = str(fecha_inicio)
-fecha_fin_str = str(fecha_fin)
+fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d")
+fecha_fin_str = fecha_fin.strftime("%Y-%m-%d")
 
 reporte_df = (
     session.table("REPORTE_MOVIMIENTOS")
