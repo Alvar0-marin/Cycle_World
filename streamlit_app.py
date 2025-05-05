@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 from snowflake.snowpark import Session
-from snowflake.snowpark.functions import col
+from snowflake.snowpark.functions import col, lit
 import datetime as dt
 import plotly.express as px
 
